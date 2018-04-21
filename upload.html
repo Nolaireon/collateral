@@ -1,0 +1,17 @@
+<form id="loginForm" method="post" action="" onsubmit="return submitLoginForm()">
+	<h4>Login to your account</h4>
+	<input name="username" class="username" onchange="validateLoginForm(this.name)" type="text" autocomplete="off" placeholder="Username" /><div class="validateIco"></div>
+	<input name="password" class="password" onchange="validateLoginForm(this.name)" type="password" placeholder="Password" /><div class="validateIco"></div>
+	<input type="submit" value="Submit" />
+</form>
+<form id="regForm" method="post" action="" onsubmit="return submitRegForm()">
+	<h4>Create an account</h4>
+	<input name="username" class="username" onchange="validateRegForm(this.name)" type="text" autocomplete="off" placeholder="Username" /><div class="validateIco"></div>
+	<input name="password" class="password" onchange="validateRegForm(this.name)" type="password" placeholder="Password" />
+	<input name="rPassword" class="password" onchange="validateRegForm(this.name)" type="password" placeholder="Repeat password" /><div class="validateIco"></div>
+	<input name="mail" class="mail" onchange="validateRegForm(this.name)" type="text" autocomplete="off" placeholder="mail.com" /><div class="validateIco"></div>
+	<input type="submit" value="Submit" />
+</form>
+<span id="toggle-login" class="button" onclick="slideToggleFunc(this.id)">Login</span>
+<span id="toggle-register" class="button" onclick="slideToggleFunc(this.id)">Register</span>
+<span id="toggle-logout" class="button" onclick="submitLogout()">Logout</span>
