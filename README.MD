@@ -1,10 +1,7 @@
 Version 1.0
 ============
 Реализованы базовые функции авторизации, без поддержки веб интерфейса.
-----------------
-### Проверить работоспособность функций можно при помощи утилиты curl.
-----------------------------
-
+### Проверить работоспособность функций можно при помощи утилиты curl:
 #### Запрос на регистрацию пользователя `action=register`
 ```bash
 curl -H "Content-Type: application/x-www-form-urlencoded" -X POST https://cb-collateral.pro/web/php/main.php?action=register -d "email=your@mail.com&password=your_password"
