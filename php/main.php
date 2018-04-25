@@ -4,9 +4,9 @@
 
 $dbOptions = array(
 	'db_host' => 'localhost',
-	'db_user' => 'test',
-	'db_pass' => 'test',
-	'db_name' => 'test'
+	'db_user' => 'cb-test',
+	'db_pass' => 'cb-test',
+	'db_name' => 'cb-test'
 );
 
 /* Database Config End */
@@ -14,7 +14,7 @@ $dbOptions = array(
 require "DB.class.php";
 require "request.php";
 
-session_name('webtest');
+session_name('collateral');
 session_start();
 
 try{
@@ -26,7 +26,7 @@ try{
 	switch($_GET['action']){
 		
 		case 'login':
-			$response = action::login($_POST['username'], $_POST['password']);
+			$response = action::login($_POST['email'], $_POST['password']);
 		break;
 		
 		case 'checkLogged':
@@ -38,7 +38,7 @@ try{
 		break;
 		
 		case 'register':
-			$response = action::register($_POST['username'], $_POST['password'], $_POST['rPassword'], $_POST['mail']);
+			$response = action::register($_POST['email'], $_POST['password']);
 		break;
 		
 		default:
