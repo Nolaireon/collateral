@@ -1,7 +1,7 @@
 <?php
 class action{	
 	public static function login($email, $password){
-		if(isset($_SESSION['user']['id'])){
+		if($_SESSION['user']['id']){
 			throw new Exception('You are logged in already.');
 		}
 		
@@ -30,7 +30,7 @@ class action{
 	}
 
 	public static function checkLogged(){
-		if(isset($_SESSION['user']['id'])){
+		if($_SESSION['user']['id']){
 			return $_SESSION['user'];
 		}else{
 			return array('checkLogged' => false);
@@ -38,7 +38,7 @@ class action{
 	}
 
 	public static function logout(){
-		if(isset($_SESSION['user']['id'])){
+		if($_SESSION['user']['id']){
 			session_unset();
 			session_destroy();
 			return array('logout' => true);
@@ -67,7 +67,7 @@ class action{
 	}
 	
 	public static function clientDataUpdate($clientData){
-		if(!isset($_SESSION['user']['id'])){
+		if(!$_SESSION['user']['id']){
 			throw new Exception('Authorization required.');
 		}
 		
