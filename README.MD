@@ -22,6 +22,4 @@ curl -H "Content-Type: application/x-www-form-urlencoded" -X POST https://cb-col
 ```bash
 curl -H "Content-Type: application/x-www-form-urlencoded" -X POST https://cb-collateral.pro/web/php/main.php?action=logout -b "/path/to/load/cookie"
 ```
-
-**Важно**
 ***При проверки некоторых функций важно сохранять/загружать cookie, в противном случае сервер не сможет определить Вас как авторизованного пользователя***
