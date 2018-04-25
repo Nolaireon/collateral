@@ -1,7 +1,7 @@
 <?php
 class action{	
 	public static function login($email, $password){
-		if($_SESSION['user']['email']){
+		if(isset($_SESSION['user']['id'])){
 			throw new Exception('You are logged in already.');
 		}
 		
@@ -9,7 +9,7 @@ class action{
 			throw new Exception('Fill in all the required fields.');
 		}
 		
-		if(!filter_input(INPUT_POST,'email',FILTER_VALIDATE_EMAIL)){
+		if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
 			throw new Exception('Your email is invalid.');
 		}
 		
@@ -17,7 +17,7 @@ class action{
 		$str = "SELECT * FROM clients WHERE email = '".DB::esc($email)."' AND password = '".$vault_pass."'";
 		$result = DB::query($str);
 	
-		if ($result->num_rows != 1){
+		if($result->num_rows != 1){
 			throw new Exception('Invalid email or password.');
 		}
 		
@@ -26,33 +26,33 @@ class action{
 		$_SESSION['user'] = $user;
 		
 		$result->free();
-		return $_SESSION['user'];
+		return $user;
 	}
 
 	public static function checkLogged(){
-		if ($_SESSION['user']['email']){
+		if(isset($_SESSION['user']['id'])){
 			return $_SESSION['user'];
-		} else {
+		}else{
 			return array('checkLogged' => false);
 		}
 	}
 
 	public static function logout(){
-		if ($_SESSION['user']['email']){
+		if(isset($_SESSION['user']['id'])){
 			session_unset();
 			session_destroy();
 			return array('logout' => true);
-		} else {
+		}else{
 			throw new Exception('You are not logged in.');
 		}
 	}
 	
 	public static function register($email, $password){
-		if (!$email || !$password){
+		if(!$email || !$password){
 			throw new Exception('Fill in all the required fields.');
 		}
 		
-		if(!filter_input(INPUT_POST,'email',FILTER_VALIDATE_EMAIL)){
+		if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
 			throw new Exception('Your email is invalid.');
 		}
 		
@@ -64,6 +64,47 @@ class action{
 		}
 		
 		return array('register' => true);
+	}
+	
+	public static function clientDataUpdate($clientData){
+		if(!isset($_SESSION['user']['id'])){
+			throw new Exception('Authorization required.');
+		}
+		
+		$args = array(
+			'name' => array(
+				'filter' => FILTER_VALIDATE_REGEXP,
+				'options' => array('regexp' => "/^[A-Za-z]{0,32}$/")
+			),
+			'surname' => array(
+				'filter' => FILTER_VALIDATE_REGEXP,
+				'options' => array('regexp' => "/^[A-Za-z]{0,32}$/")
+			),
+			'patronymic' => array(
+				'filter' => FILTER_VALIDATE_REGEXP,
+				'options' => array('regexp' => "/^[A-Za-z]{0,32}$/")
+			),
+			'birth_day' => array(
+				'filter' => FILTER_VALIDATE_REGEXP,
+				'options' => array('regexp' => "/^\d{4}-\d{2}-\d{2}$/")
+			)
+		);
+		
+		$data = filter_var_array($clientData, $args);
+		
+		$str = "UPDATE clients SET ";
+		foreach($data as $k=>$v){
+			if(!is_null($v) && $v != false){
+				$str = $str.$k."='".$v."', ";
+			}
+		}
+		$str = $str."last_activity=NOW() WHERE client_id=".$_SESSION['user']['id'];
+		
+		if(!DB::query($str)){
+			throw new Exception('Database error: '.DB::getMySQLiObject()->error());
+		}
+		
+		return array('updated' => true);
 	}
 }
 ?>

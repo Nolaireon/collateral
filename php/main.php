@@ -23,31 +23,41 @@ try{
 	
 	$response = array();
 	
-	switch($_GET['action']){
-		
-		case 'login':
-			$response = action::login($_POST['email'], $_POST['password']);
-		break;
-		
-		case 'checkLogged':
-			$response = action::checkLogged();
-		break;
-		
-		case 'logout':
-			$response = action::logout();
-		break;
-		
-		case 'register':
-			$response = action::register($_POST['email'], $_POST['password']);
-		break;
-		
-		default:
-			throw new Exception('Wrong action');
+	if(!empty($_POST)){
+		switch($_GET['action']){
+			
+			case 'login':
+				$response = action::login($_POST['email'], $_POST['password']);
+			break;
+			
+			case 'register':
+				$response = action::register($_POST['email'], $_POST['password']);
+			break;
+			
+			case 'clientDataUpdate':
+				$response = action::clientDataUpdate($_POST);
+			break;
+			
+			default:
+				throw new Exception('Wrong action');
+		}
+	}else{
+		switch($_GET['action']){
+			case 'checkLogged':
+				$response = action::checkLogged();
+			break;
+			
+			case 'logout':
+				$response = action::logout();
+			break;
+			
+			default:
+				throw new Exception('Wrong action');
+		}
 	}
 	
 	echo json_encode($response);
 }
-
 catch(Exception $e){
 	die(json_encode(array('error' => $e->getMessage())));
 }
