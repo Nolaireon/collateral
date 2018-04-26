@@ -1,7 +1,7 @@
 <?php
 class action{	
 	public static function login($email, $password){
-		if($_SESSION['user']['id']){
+		if($_SESSION['user']['client_id']){
 			throw new Exception('You are logged in already.');
 		}
 		
@@ -30,7 +30,7 @@ class action{
 	}
 
 	public static function checkLogged(){
-		if($_SESSION['user']['id']){
+		if($_SESSION['user']['client_id']){
 			return $_SESSION['user'];
 		}else{
 			return array('checkLogged' => false);
@@ -38,7 +38,7 @@ class action{
 	}
 
 	public static function logout(){
-		if($_SESSION['user']['id']){
+		if($_SESSION['user']['client_id']){
 			session_unset();
 			session_destroy();
 			return array('logout' => true);
@@ -67,7 +67,7 @@ class action{
 	}
 	
 	public static function clientDataUpdate($clientData){
-		if(!$_SESSION['user']['id']){
+		if(!$_SESSION['user']['client_id']){
 			throw new Exception('Authorization required.');
 		}
 		
@@ -98,7 +98,7 @@ class action{
 				$str = $str.$k."='".$v."', ";
 			}
 		}
-		$str = $str."last_activity=NOW() WHERE client_id=".$_SESSION['user']['id'];
+		$str = $str."last_activity=NOW() WHERE client_id=".$_SESSION['user']['client_id'];
 		
 		if(!DB::query($str)){
 			throw new Exception('Database error: '.DB::getMySQLiObject()->error());
