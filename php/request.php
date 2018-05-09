@@ -1,110 +1,106 @@
 <?php
-class action{	
-	public static function login($email, $password){
-		if($_SESSION['user']['client_id']){
-			throw new Exception('You are logged in already.');
-		}
-		
-		if(!$email || !$password){
-			throw new Exception('Fill in all the required fields.');
-		}
-		
-		if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
-			throw new Exception('Your email is invalid.');
-		}
-		
-		$vault_pass = hash('sha256', DB::esc($password));
-		$str = "SELECT * FROM clients WHERE email = '".DB::esc($email)."' AND password = '".$vault_pass."'";
-		$result = DB::query($str);
+
+class action{
 	
-		if($result->num_rows != 1){
-			throw new Exception('Invalid email or password.');
+	public static function login(){
+		if(isset($_SESSION['user']['client_id'])){
+			throw new Exception('You have already logged in.', 1);
 		}
 		
-		$user = $result->fetch_assoc();
+		if(!isset($_POST['email'], $_POST['password'])){
+			throw new Exception('Fill in all the required fields.', 1);
+		}
 		
-		$_SESSION['user'] = $user;
+		$client = new Client();
 		
-		$result->free();
-		return $user;
+		$client->select();
+		
+		return array('result' => $_SESSION['user']);
 	}
 
-	public static function checkLogged(){
-		if($_SESSION['user']['client_id']){
-			return $_SESSION['user'];
-		}else{
-			return array('checkLogged' => false);
+	public static function checkLogged(){	
+		if(!isset($_SESSION['user']['client_id'])){
+			throw new Exception('You have not logged in.', 1);
 		}
+		
+		return array('result' => $_SESSION['user']);
 	}
 
 	public static function logout(){
-		if($_SESSION['user']['client_id']){
-			session_unset();
-			session_destroy();
-			return array('logout' => true);
-		}else{
-			throw new Exception('You are not logged in.');
+		if(!isset($_SESSION['user']['client_id'])){
+			throw new Exception('Authorization required.', 1);
 		}
+		
+		session_unset();
+		session_destroy();
+		
+		return array('msg' => 'You have logged out.');
 	}
 	
-	public static function register($email, $password){
-		if(!$email || !$password){
-			throw new Exception('Fill in all the required fields.');
+	public static function register(){
+		if(!isset($_POST['firstname'], $_POST['email'], $_POST['password'])){
+			throw new Exception('Fill in all the required fields.', 1);
 		}
 		
-		if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
-			throw new Exception('Your email is invalid.');
-		}
+		$client = new Client();
 		
-		$vault_pass = hash('sha256', DB::esc($password));
-		$str = "INSERT INTO clients(email, password) VALUES ('".DB::esc($email)."', '".$vault_pass."')";
-		DB::query($str);
-		if(DB::getMySQLiObject()->affected_rows != 1){
-			throw new Exception('This email is in use.');
-		}
+		$client->add();
 		
-		return array('register' => true);
+		return array('msg' => 'Account has been created.');
 	}
 	
-	public static function clientDataUpdate($clientData){
-		if(!$_SESSION['user']['client_id']){
-			throw new Exception('Authorization required.');
+	public static function clientDataUpdate(){
+		if(!isset($_SESSION['user']['client_id'])){
+			throw new Exception('Authorization required.', 1);
 		}
 		
-		$args = array(
-			'name' => array(
-				'filter' => FILTER_VALIDATE_REGEXP,
-				'options' => array('regexp' => "/^[A-Za-z]{0,32}$/")
-			),
-			'surname' => array(
-				'filter' => FILTER_VALIDATE_REGEXP,
-				'options' => array('regexp' => "/^[A-Za-z]{0,32}$/")
-			),
-			'patronymic' => array(
-				'filter' => FILTER_VALIDATE_REGEXP,
-				'options' => array('regexp' => "/^[A-Za-z]{0,32}$/")
-			),
-			'birth_day' => array(
-				'filter' => FILTER_VALIDATE_REGEXP,
-				'options' => array('regexp' => "/^\d{4}-\d{2}-\d{2}$/")
-			)
-		);
+		$client = new Client();
 		
-		$data = filter_var_array($clientData, $args);
+		$client->update();
 		
-		$str = "UPDATE clients SET ";
-		foreach($data as $k=>$v){
-			if(!is_null($v) && $v != false){
-				$str = $str.$k."='".$v."', ";
-			}
-		}
-		$str = $str."last_activity=NOW() WHERE client_id=".$_SESSION['user']['client_id'];
-		
-		if(!DB::query($str)){
-			throw new Exception('Database error: '.DB::getMySQLiObject()->error());
-		}
-		
-		return array('updated' => true);
+		return array('msg' => 'Data was updated.');
 	}
+	
+	public static function companyDataAdd(){
+		if(!isset($_SESSION['user']['client_id'])){
+			throw new Exception('Authorization required.', 1);
+		}
+		
+		if($_SESSION['user']['company_id'] != 0){
+			throw new Exception('You can create only one company per account', 1);
+		}
+		
+		if(!isset($_POST['name'], $_POST['owner'])){
+			throw new Exception('Fill in all the required fields.', 1);
+		}
+		
+		$company = new Company();
+		
+		$company->add();
+		
+		return array('msg' => 'Company has been created.');
+	}
+	
+	public static function companyDataUpdate(){
+		if(!isset($_SESSION['user']['client_id'])){
+			throw new Exception('Authorization required.', 1);
+		}
+		
+		if($_SESSION['user']['company_id'] == 0){
+			throw new Exception('You have no company to update it.', 1);
+		}
+		
+		if(!isset($_POST['name']) && !isset($_POST['owner'])){
+			throw new Exception('Fill in all the required fields.', 1);
+		}
+		
+		$company = new Company();
+		
+		$company->update();
+		
+		return array('msg' => 'Company has been updated.');
+	}
+
 }
+
 ?>

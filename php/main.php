@@ -13,6 +13,10 @@ $dbOptions = array(
 
 require "DB.class.php";
 require "request.php";
+require "Base.php";
+require "Client.php";
+require "Company.php";
+require "CustomException.php";
 
 session_name('collateral');
 session_start();
@@ -23,42 +27,50 @@ try{
 	
 	$response = array();
 	
-	if(!empty($_POST)){
-		switch($_GET['action']){
-			
-			case 'login':
-				$response = action::login($_POST['email'], $_POST['password']);
-			break;
-			
-			case 'register':
-				$response = action::register($_POST['email'], $_POST['password']);
-			break;
-			
-			case 'clientDataUpdate':
-				$response = action::clientDataUpdate($_POST);
-			break;
-			
-			default:
-				throw new Exception('Wrong action');
-		}
-	}else{
-		switch($_GET['action']){
-			case 'checkLogged':
-				$response = action::checkLogged();
-			break;
-			
-			case 'logout':
-				$response = action::logout();
-			break;
-			
-			default:
-				throw new Exception('Wrong action');
-		}
+	if(!isset($_GET['action'])){
+		throw new Exception('action not specified');
 	}
 	
-	echo json_encode($response);
+	switch($_GET['action']){
+		
+		case 'login':
+			$response = action::login();
+		break;
+		
+		case 'register':
+			$response = action::register();
+		break;
+		
+		case 'clientDataUpdate':
+			$response = action::clientDataUpdate();
+		break;
+		
+		case 'companyDataAdd':
+			$response = action::companyDataAdd();
+		break;
+		
+		case 'companyDataUpdate':
+			$response = action::companyDataUpdate();
+		break;
+		
+		case 'checkLogged':
+			$response = action::checkLogged();
+		break;
+		
+		case 'logout':
+			$response = action::logout();
+		break;
+		
+		default:
+			throw new Exception('Wrong action');
+	}
+	
+	echo json_encode(array('rc' => 0) + $response);
+	
+}catch(CustomException $e){
+	die(json_encode(array('rc' => $e->getCode(), 'errors' => $e->getErrors(), 'msg' => $e->getMessage())));
+}catch(Exception $e){
+	die(json_encode(array('rc' => $e->getCode(), 'msg' => $e->getMessage())));
 }
-catch(Exception $e){
-	die(json_encode(array('error' => $e->getMessage())));
-}
+
 ?>
